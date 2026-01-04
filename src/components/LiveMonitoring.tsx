@@ -36,7 +36,7 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
     >
       {isMonitoring ? (
         <img 
-          src="http://localhost:8000/api/v1/monitoring/video_feed" 
+          src="http://127.0.0.1:8000/api/v1/monitoring/video_feed" 
           alt="Live Monitoring Feed"
           className="w-full h-full object-cover"
           onError={(e) => {
