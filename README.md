@@ -1,73 +1,114 @@
-# React + TypeScript + Vite
+# 🎓 AI-Powered Exam Integrity Monitor (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![React](https://img.shields.io/badge/React-19.2-blue?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-Currently, two official plugins are available:
+A premium, state-of-the-art monitoring dashboard designed to ensure academic integrity using advanced computer vision and real-time behavioral analytics. This frontend application provides proctors with a centralized interface to monitor exams, analyze risk levels, and manage captured evidence.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 📺 **Live Monitoring Control**: Real-time video feed integration with computer vision overlays (Head-pose/Yaw estimation).
+- 📊 **Risk Analytics Dashboard**: Dynamic visualization of integrity scores, alert density, and behavioral vectors.
+- 🕒 **Real-Time Evidence Gallery**: Instant access to high-resolution captures of suspicious activities with time-stamped logs.
+- ⚡ **Persistent Polling**: Seamless data synchronization with the backend every 2 seconds for zero-reload updates.
+- 📱 **Premium UI/UX**: Professional dark-themed interface built with Framer Motion for smooth micro-animations and micro-interactions.
+- 🖥️ **Full-Screen Mode**: Immersive monitoring view for dedicated supervision.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Core**: React 19 (TypeScript)
+- **Tooling**: Vite (HMR enabled)
+- **Styling**: Tailwind CSS 4.x (Vite Plugin)
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **HTTP Client**: Axios
+- **State Management**: React Hooks (Custom `useMonitoring` for real-time sync)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- NPM or PNPM
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd Exam_Cheating_Detector_Frontend
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Configure API Endpoint**
+   Update the `API_BASE_URL` in `src/api/monitoring.ts`:
+
+   ```typescript
+   // Default is pointed to the production server
+   const API_BASE_URL =
+     "https://examcheating-detector-backend.onrender.com/api/v1/monitoring";
+   ```
+
+4. **Start Development Server**
+
+   ```bash
+   npm run dev
+   ```
+
+5. **Build for Production**
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 📁 Project Structure
+
+```text
+src/
+├── api/             # API service definitions (Axios)
+├── components/      # Reusable UI components (Live Monitor, Stats, Analytics)
+├── hooks/           # Custom React hooks (useMonitoring sync logic)
+├── layout/          # Global layout components (Navbar)
+├── shared/          # Generic UI primitives (StatCards, Buttons)
+├── types/           # TypeScript interfaces and signatures
+└── App.tsx          # Main application orchestration
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 👮 Security & Performance
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Optimized Polling**: Implements efficient background synchronization to maintain state without heavy CPU overhead.
+- **Environment Agnostic**: Type-safe implementations that work across browser and cross-platform environments.
+- **Responsive Design**: Fully optimized for various monitor resolutions and supervising environments.
+
+---
+
+## 🤝 Backend Integration
+
+This frontend is designed to work in tandem with the [Exam Cheating Detector Backend](https://github.com/kartik-barman/Exam_Cheating_Detector_Backend), which handles:
+
+- OpenCV-based head pose estimation.
+- Event ID and log generation.
+- Dynamic MJPEG video streaming.
+
+---
+
+## 📄 License
+
+Project managed and maintained by **Kartik Barman**. Built as part of the Major Project for academic integrity research.
