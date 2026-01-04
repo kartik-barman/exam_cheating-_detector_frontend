@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react';
-import { Maximize2, Shield, Activity, AlertCircle } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { Maximize2, Shield, Activity, AlertCircle, Camera } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { API_BASE_URL } from '../api/monitoring';
 
 interface LiveMonitoringProps {
   isMonitoring: boolean;
@@ -8,16 +10,80 @@ interface LiveMonitoringProps {
 }
 
 export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
-  const videoRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [currentYaw, setCurrentYaw] = useState<number | null>(null);
+
+  // Initialize Webcam in Browser
+  useEffect(() => {
+    async function setupWebcam() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: 1280, height: 720, facingMode: 'user' } 
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setHasPermission(true);
+        }
+      } catch (err) {
+        console.error("Webcam access denied:", err);
+        setHasPermission(false);
+      }
+    }
+    setupWebcam();
+
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  // Frame Processing Loop
+  useEffect(() => {
+    let intervalId: any;
+
+    if (isMonitoring && hasPermission) {
+      intervalId = setInterval(async () => {
+        if (!videoRef.current || !canvasRef.current || !isMonitoring) return;
+
+        const canvas = canvasRef.current;
+        const video = videoRef.current;
+        const context = canvas.getContext('2d');
+
+        if (context) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          const base64Image = canvas.toDataURL('image/jpeg', 0.6);
+          
+          try {
+            const response = await axios.post(`${API_BASE_URL}/process_frame`, {
+              image: base64Image
+            });
+            if (response.data.yaw !== undefined) {
+              setCurrentYaw(response.data.yaw);
+            }
+          } catch (err) {
+            console.error("Frame processing error:", err);
+          }
+        }
+      }, 500); // Process every 500ms to balance accuracy and performance
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isMonitoring, hasPermission]);
 
   const toggleFullscreen = () => {
-    if (!videoRef.current) return;
+    if (!containerRef.current) return;
 
     if (!document.fullscreenElement) {
-      videoRef.current.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
+      containerRef.current.requestFullscreen();
       setIsFullscreen(true);
     } else {
       document.exitFullscreen();
@@ -31,12 +97,12 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
 
   return (
     <div 
-      ref={videoRef}
+      ref={containerRef}
       className={`relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group ${isFullscreen ? 'rounded-none' : ''}`}
     >
       {isMonitoring ? (
         <img 
-          src="http://127.0.0.1:8000/api/v1/monitoring/video_feed" 
+          src="http://localhost:8000/api/v1/monitoring/video_feed" 
           alt="Live Monitoring Feed"
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -48,6 +114,14 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
           <Shield className="w-16 h-16 opacity-20" />
           <p className="font-medium">Monitoring service is offline</p>
         </div>
+      ) : (
+        <video 
+          ref={videoRef}
+          autoPlay 
+          playsInline 
+          muted 
+          className={`w-full h-full object-cover transition-opacity duration-1000 ${isMonitoring ? 'opacity-100' : 'opacity-40 grayscale'}`}
+        />
       )}
 
       {/* Overlays */}
@@ -62,13 +136,13 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
               {isMonitoring ? 'Live Monitor' : 'System Ready'}
             </span>
           </div>
-          {isMonitoring && (
+          {isMonitoring && currentYaw !== null && (
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-blue-500/20 backdrop-blur-md border border-blue-500/30 px-3 py-1.5 rounded-full"
+              className={`px-3 py-1.5 rounded-full backdrop-blur-md border ${Math.abs(currentYaw) > 25 ? 'bg-red-500/20 border-red-500/30 text-red-400' : 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'}`}
             >
-              <span className="text-[10px] font-bold text-blue-400">ENCRYPTION ACTIVE</span>
+              <span className="text-[10px] font-bold">YAW: {currentYaw.toFixed(1)}°</span>
             </motion.div>
           )}
         </div>
@@ -84,12 +158,14 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
       {/* Bottom Dashboard Overlay */}
       <div className="absolute bottom-6 left-6 right-6 pointer-events-none">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <RiskStat icon={<Activity className="w-4 h-4" />} label="Avg. Yaw" value="12.4°" />
+          <RiskStat icon={<Activity className="w-4 h-4" />} label="Avg. Yaw" value={currentYaw !== null ? `${currentYaw.toFixed(1)}°` : '0°'} />
           <RiskStat icon={<Shield className="w-4 h-4" />} label="Risk Score" value={riskLevel} valueColor={riskColor} />
           <RiskStat icon={<AlertCircle className="w-4 h-4" />} label="Anomalies" value={totalWarnings.toString()} />
           <div className="px-4 py-3 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10">
             <p className="text-[10px] text-neutral-500 font-bold uppercase mb-1">Status</p>
-            <p className="text-sm font-bold text-white leading-none">Healthy</p>
+            <p className="text-sm font-bold text-white leading-none">
+              {isMonitoring ? 'Analyzing...' : 'Standby'}
+            </p>
           </div>
         </div>
       </div>
