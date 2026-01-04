@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { MonitoringResponse } from '../types/monitoring';
 
-const API_BASE_URL = 'https://examcheating-detector-backend.onrender.com/api/v1/monitoring';
+export const API_BASE_URL = 'https://examcheating-detector-backend.onrender.com/api/v1/monitoring';
 
 export const startMonitoringApi = async () => {
   const response = await axios.get(`${API_BASE_URL}/start`);
