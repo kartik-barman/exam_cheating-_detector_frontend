@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Maximize2, Shield, Activity, AlertCircle, Camera } from 'lucide-react';
+import { Maximize2, Shield, Activity, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API_BASE_URL } from '../api/monitoring';
@@ -102,7 +102,7 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
     >
       {isMonitoring ? (
         <img 
-          src="http://localhost:8000/api/v1/monitoring/video_feed" 
+          src="http://127.0.0.1:8000/api/v1/monitoring/video_feed" 
           alt="Live Monitoring Feed"
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -114,7 +114,7 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
           <Shield className="w-16 h-16 opacity-20" />
           <p className="font-medium">Monitoring service is offline</p>
         </div>
-      ) : (
+      ) }: (
         <video 
           ref={videoRef}
           autoPlay 
@@ -122,7 +122,7 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
           muted 
           className={`w-full h-full object-cover transition-opacity duration-1000 ${isMonitoring ? 'opacity-100' : 'opacity-40 grayscale'}`}
         />
-      )}
+      )
 
       {/* Overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none" />
