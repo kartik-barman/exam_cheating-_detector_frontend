@@ -2,7 +2,8 @@ import { useRef, useState, useEffect } from 'react';
 import { Maximize2, Shield, Activity, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { API_BASE_URL } from '../api/monitoring';
+import { API_BASE_URL } from '../config/config';
+
 
 interface LiveMonitoringProps {
   isMonitoring: boolean;
@@ -21,8 +22,8 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
   useEffect(() => {
     async function setupWebcam() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { width: 1280, height: 720, facingMode: 'user' } 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 1280, height: 720, facingMode: 'user' }
         });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -59,9 +60,9 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          
+
           const base64Image = canvas.toDataURL('image/jpeg', 0.6);
-          
+
           try {
             const response = await axios.post(`${API_BASE_URL}/process_frame`, {
               image: base64Image
@@ -96,13 +97,13 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
   const riskColor = riskLevel === 'High' ? 'text-red-500' : riskLevel === 'Medium' ? 'text-yellow-500' : 'text-emerald-500';
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-neutral-900 shadow-2xl group ${isFullscreen ? 'rounded-none' : ''}`}
     >
       {isMonitoring ? (
-        <img 
-          src="http://127.0.0.1:8000/api/v1/monitoring/video_feed" 
+        <img
+          src="http://127.0.0.1:8000/api/v1/monitoring/video_feed"
           alt="Live Monitoring Feed"
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -114,18 +115,18 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
           <Shield className="w-16 h-16 opacity-20" />
           <p className="font-medium">Monitoring service is offline</p>
         </div>
-      ) }: (
-        <video 
-          ref={videoRef}
-          autoPlay 
-          playsInline 
-          muted 
-          className={`w-full h-full object-cover transition-opacity duration-1000 ${isMonitoring ? 'opacity-100' : 'opacity-40 grayscale'}`}
-        />
+      )}: (
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className={`w-full h-full object-cover transition-opacity duration-1000 ${isMonitoring ? 'opacity-100' : 'opacity-40 grayscale'}`}
+      />
       )
 
       {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/40 pointer-events-none" />
 
       {/* Top Bar */}
       <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none">
@@ -137,7 +138,7 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
             </span>
           </div>
           {isMonitoring && currentYaw !== null && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               className={`px-3 py-1.5 rounded-full backdrop-blur-md border ${Math.abs(currentYaw) > 25 ? 'bg-red-500/20 border-red-500/30 text-red-400' : 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'}`}
@@ -147,7 +148,7 @@ export function LiveMonitoring({ isMonitoring, results }: LiveMonitoringProps) {
           )}
         </div>
 
-        <button 
+        <button
           onClick={toggleFullscreen}
           className="p-3 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-white pointer-events-auto hover:bg-white hover:text-black transition-all"
         >
